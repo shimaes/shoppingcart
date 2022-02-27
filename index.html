@@ -1,0 +1,127 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        #root {
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .container {
+            width: 40%;
+            /* min-width: 48%; */
+            margin: 5px 1%;
+            border: 2px solid teal;
+            padding: 10px;
+        }
+        .flex {
+            display: flex;
+            justify-content: space-between;
+        }
+        .but {
+            width: fit-content;
+            background-color: powderblue ;
+        }
+        .img {
+            width: 50%;
+            object-fit: contain;
+            margin: auto;
+            max-height: 300px;
+            min-height: 300px;
+        }
+        .column {
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+    <title>Document</title>
+    <script>
+        let cardList = []
+        function handleAddToCardOrIncrease(product) {
+            const isProductInCard = cardList.findIndex(i => i.id == product.id)
+            const tempCard = [...cardList]
+            if (isProductInCard >=0 ) {
+                tempCard[isProductInCard].count += 1
+            } else {
+                const tempProduct = {...product}
+                tempProduct.count = 1
+                tempCard.push(tempProduct)
+            }
+            cardList = [...tempCard]
+            handleUpdateTheCard()
+        }
+        function handleremoveFromCardOrDecrease(product) {
+            const index = cardList.findIndex(i => i.id == product.id)
+            const tempCard = [...cardList]
+            if (tempCard[index].count > 1) {
+                tempCard[index].count -= 1
+            } else {
+                tempCard.splice(index, 1)
+            }
+            cardList = [...tempCard]
+            handleUpdateTheCard()
+        }
+        function handleUpdateTheCard() {
+            const element = document.getElementById("card");
+            element.innerHTML = ''
+            cardList.forEach(pr => {
+                const div = document.createElement("div");
+                div.className = "container"
+                div.innerHTML = `
+                <div class="flex column">
+                    <div class="flex">
+                        ${pr.name}
+                        <button>${pr.count}تعداد</button>
+                        <button id="del-${pr.id}">${pr.count > 1 ? "کاستن" : "حذف"}</button>
+                    </div>
+                </div>
+                ` 
+                element.appendChild(div);
+                const btn = document.getElementById(`del-${pr.id}`)
+                btn.addEventListener("click", () => handleremoveFromCardOrDecrease(pr))
+            })
+        }
+        async function hanleWindowonLoad() {
+            console.log("Im running");
+            const temp = await fetch("https://course-api.com/react-store-products")
+            const data = await temp.json()
+            data.forEach(product => {
+                // const div = document.createElement("div");
+                // const productName = document.createTextNode(product.name);
+                // div.appendChild(productName);
+                // const element = document.getElementById("root");
+                // element.appendChild(div);
+                const div = document.createElement("div");
+                div.className = "container"
+                div.innerHTML = `
+                <div class="flex column">
+                    <img class="img" src=${product.image} alt="" />
+                    <div class="flex">
+                        ${product.name}
+                        <button id=${product.id}>افزودن به سبد خرید</button>
+                    </div>
+                </div>
+                `
+                const element = document.getElementById("root");
+                element.appendChild(div);
+                const btn = document.getElementById(product.id)
+                btn.addEventListener("click", () => handleAddToCardOrIncrease(product))
+            });
+            console.log(data);
+        }
+        window.onload = hanleWindowonLoad
+    </script>
+</head>
+
+<body>
+    <div id="root">
+    </div>
+    <div id="card">
+
+    </div>
+</body>
+
+</html>
